@@ -12,12 +12,12 @@ MODEL_PATH = os.path.join("models", "final_model.pkl")
 st.title("Predicción: ¿La compañía respondió a tiempo?")
 
 # Lista de opciones (puedes ajustarlas según tu dataset)
-estados = ['TX', 'MA', 'CA', nan, 'OH', 'NJ', 'ND', 'RI', 'CO', 'UT', 'AL',
-       'PA', 'NY', 'NC', 'GA', 'IL', 'WI', 'MI', 'FL', 'CT', 'OR', 'VA',
-       'WA', 'TN', 'MD', 'IA', 'KY', 'LA', 'OK', 'NE', 'KS', 'MO', 'NH',
-       'IN', 'DC', 'NV', 'ME', 'NM', 'SC', 'AZ', 'AP', 'MS', 'MN', 'ID',
-       'HI', 'PR', 'WV', 'WY', 'AK', 'VI', 'MT', 'DE', 'AR', 'AE', 'SD',
-       'GU', 'VT', 'MH', 'PW', 'AS']
+estados = ['AE', 'AK', 'AL', 'AP', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC',
+       'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY',
+       'LA', 'MA', 'MD', 'ME', 'MH', 'MI', 'MN', 'MO', 'MS', 'MT', 'NC',
+       'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA',
+       'PR', 'PW', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT',
+       'WA', 'WI', 'WV', 'WY']
 productos = ['Debt collection', 'Mortgage', 'Credit card', 'Consumer loan',
        'Bank account or service', 'Payday loan', 'Credit reporting',
        'Money transfers', 'Student loan', 'Prepaid card',
