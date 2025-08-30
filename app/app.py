@@ -24,10 +24,10 @@ productos = ['Debt collection', 'Mortgage', 'Credit card', 'Consumer loan',
        'Other financial service']
 
 # Cargar mappings
-with open("estado_mapping.pkl", "rb") as f:
+with open("models/estado_mapping.pkl", "rb") as f:
     estado_mapping = pickle.load(f)
 
-with open("producto_mapping.pkl", "rb") as f:
+with open("models/estado_mapping.pkl", "rb") as f:
     producto_mapping = pickle.load(f)
 
  
