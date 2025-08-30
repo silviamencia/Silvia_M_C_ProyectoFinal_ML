@@ -12,7 +12,7 @@ MODEL_PATH = os.path.join("models", "final_model.pkl")
 st.title("Predicción: ¿La compañía respondió a tiempo?")
 
 # Lista de opciones (puedes ajustarlas según tu dataset)
-estados = [TX', 'MA', 'CA', nan, 'OH', 'NJ', 'ND', 'RI', 'CO', 'UT', 'AL',
+estados = ['TX', 'MA', 'CA', nan, 'OH', 'NJ', 'ND', 'RI', 'CO', 'UT', 'AL',
        'PA', 'NY', 'NC', 'GA', 'IL', 'WI', 'MI', 'FL', 'CT', 'OR', 'VA',
        'WA', 'TN', 'MD', 'IA', 'KY', 'LA', 'OK', 'NE', 'KS', 'MO', 'NH',
        'IN', 'DC', 'NV', 'ME', 'NM', 'SC', 'AZ', 'AP', 'MS', 'MN', 'ID',
