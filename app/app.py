@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import os
 
-# Ruta absoluta o relativa al modelo
+# Ruta a la carpeta "models" que está en Github
 
-MODEL_PATH = r"C:\Users\silvi\Documents\DATA_SCIENCE\TheBridge - copia\DSPT2025-ML\Proyectofinal\Silvia_Proyecto_Final_ML\models\final_model.pkl"
+MODEL_PATH = os.path.join("models", "final_model.pkl")
 
 
 # Verificar que existe antes de cargarlo
