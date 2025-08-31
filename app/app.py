@@ -3,6 +3,15 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
+
+
+BASE_DIR = os.path.dirname(__file__)  # carpeta donde está app.py
+model_path = os.path.join(BASE_DIR, "rf_model.pkl")
+scaler_path = os.path.join(BASE_DIR, "scaler.pkl")
+
+#model = joblib.load(model_path)
+#scaler = joblib.load(scaler_path)
 
 st.title("Predicción de Respuesta Oportuna")
 st.write("Esta aplicación predice si habrá una respuesta oportuna basado en las características del cliente.")
