@@ -26,61 +26,52 @@ encoders = joblib.load(ENCODERS_PATH)
 st.sidebar.header("Ingrese los datos del cliente")
 
 # -------------------------------
-# 3. Inputs dinámicos
+# 3. Crear inputs dinámicos (mostrando categorías originales)
 # -------------------------------
-input_data = {}       # valores codificados para el modelo
-original_values = {}  # valores originales en texto/numérico
+input_data = {}
+original_values = {}  # Para almacenar los valores originales
 
 for col in feature_columns:
     if col in encoders:  # columna categórica
+        # Mostrar selectbox con las categorías originales
         categories = encoders[col].classes_.tolist()
-        selected_value = st.sidebar.selectbox(col, categories)   # el usuario ve los valores originales
-        input_data[col] = encoders[col].transform([selected_value])[0]  # numérico para el modelo
-        original_values[col] = selected_value  # guardamos el valor categórico en texto
+        selected_value = st.sidebar.selectbox(col, categories)
+        input_data[col] = encoders[col].transform([selected_value])[0]  # Guardar el valor codificado
+        original_values[col] = selected_value  # Guardar el valor original para mostrar
     else:  # columna numérica
-        val = st.sidebar.number_input(col, value=0.0)
-        input_data[col] = val
-        original_values[col] = val  # guardamos el valor tal cual
+        input_data[col] = st.sidebar.number_input(col, value=0.0)
 
 # -------------------------------
-# 4. Mostrar siempre valores categóricos originales
+# 4. Mostrar los valores seleccionados (originales)
 # -------------------------------
-st.subheader("Valores seleccionados (originales):")
-st.dataframe(pd.DataFrame([original_values]))
+st.subheader("Valores seleccionados:")
+for col, value in original_values.items():
+    st.write(f"{col}: {value}")
 
-# -------------------------------
-# 5. DataFrame para el modelo
-# -------------------------------
+for col in feature_columns:
+    if col not in original_values:  # Para columnas numéricas
+        st.write(f"{col}: {input_data[col]}")
+
+# Crear DataFrame
 input_df = pd.DataFrame([input_data], columns=feature_columns)
 
 # -------------------------------
-# 6. Escalar datos
+# 5. Escalar datos
 # -------------------------------
 input_scaled = scaler.transform(input_df)
 
 # -------------------------------
-# 7. Predicción
+# 6. Predicción
 # -------------------------------
 if st.button("Predecir"):
     prediction = model.predict(input_scaled)
     prediction_prob = model.predict_proba(input_scaled)
 
-    st.subheader("Resultado de la predicción:")
     if prediction[0] == 1:
         st.success("✅ La respuesta será oportuna")
     else:
         st.error("❌ La respuesta no será oportuna")
 
-    # Probabilidades
     st.info(f"Probabilidad de Respuesta Oportuna: {prediction_prob[0][1]:.2f}")
     st.info(f"Probabilidad de Respuesta No Oportuna: {prediction_prob[0][0]:.2f}")
-
-    # Tabla resumen final con valores originales + predicción
-    resumen = original_values.copy()
-    resumen["Predicción"] = "Oportuna" if prediction[0] == 1 else "No Oportuna"
-    resumen["Prob. Oportuna"] = round(prediction_prob[0][1], 2)
-    resumen["Prob. No Oportuna"] = round(prediction_prob[0][0], 2)
-
-    st.subheader("Resumen completo:")
-    st.table(pd.DataFrame([resumen]))
 
