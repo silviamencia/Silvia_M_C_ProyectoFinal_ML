@@ -17,10 +17,24 @@ model = joblib.load(os.path.join(BASE_DIR, "rf_model.pkl"))
 scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
 feature_columns = joblib.load(os.path.join(BASE_DIR, "feature_columns.pkl"))
 encoders = joblib.load(os.path.join(BASE_DIR, "encoders.pkl"))
-column_info = joblib.load(os.path.join(BASE_DIR, "column_info.pkl"))
 
 # -------------------------------
-# 3. Inputs del usuario
+# 3. Cargar DataFrame de entrenamiento para categorías
+# -------------------------------
+df_train = pd.read_csv(os.path.join(BASE_DIR, "datos_entrenamiento.csv"))
+
+# -------------------------------
+# 4. Detectar tipo de columna y categorías
+# -------------------------------
+column_info = {}
+for col in feature_columns:
+    if pd.api.types.is_numeric_dtype(df_train[col]):
+        column_info[col] = {"type": "numeric"}
+    else:
+        column_info[col] = {"type": "categorical", "categories": sorted(df_train[col].dropna().unique())}
+
+# -------------------------------
+# 5. Inputs del usuario
 # -------------------------------
 st.sidebar.header("Ingrese los datos del cliente")
 input_data = {}
@@ -29,17 +43,14 @@ for col in feature_columns:
     col_type = column_info[col]["type"]
     if col_type == "numeric":
         input_data[col] = st.sidebar.number_input(col, value=0.0)
-    elif col_type == "categorical":
-        # Mostrar las categorías como aparecen en el dataset original
+    else:  # categórica
         input_data[col] = st.sidebar.selectbox(col, column_info[col]["categories"])
-    else:
-        st.warning(f"Columna {col} no tiene tipo reconocido.")
 
 # Crear DataFrame con tipos originales
 input_df = pd.DataFrame([input_data], columns=feature_columns)
 
 # -------------------------------
-# 4. Transformar categóricas con LabelEncoder
+# 6. Transformar categóricas con LabelEncoder
 # -------------------------------
 for col, le in encoders.items():
     try:
@@ -49,12 +60,12 @@ for col, le in encoders.items():
         st.stop()
 
 # -------------------------------
-# 5. Escalar datos
+# 7. Escalar datos
 # -------------------------------
 input_scaled = scaler.transform(input_df)
 
 # -------------------------------
-# 6. Predicción
+# 8. Predicción
 # -------------------------------
 if st.button("Predecir"):
     prediction = model.predict(input_scaled)
