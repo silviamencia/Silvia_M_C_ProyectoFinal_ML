@@ -3,6 +3,7 @@ import streamlit as st
 import pickle
 import pandas as pd
 import os
+import joblib
 
 MODEL_PATH = os.path.join("models", "final_model.pkl")
 
