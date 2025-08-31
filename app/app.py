@@ -26,33 +26,30 @@ encoders = joblib.load(ENCODERS_PATH)
 st.sidebar.header("Ingrese los datos del cliente")
 
 # -------------------------------
-# 3. Crear inputs dinámicos (mostrando categorías originales)
+# 3. Crear inputs dinámicos
 # -------------------------------
 input_data = {}
-original_values = {}  # Para almacenar los valores originales
+original_values = {}
 
 for col in feature_columns:
     if col in encoders:  # columna categórica
-        # Mostrar selectbox con las categorías originales
         categories = encoders[col].classes_.tolist()
         selected_value = st.sidebar.selectbox(col, categories)
-        input_data[col] = encoders[col].transform([selected_value])[0]  # Guardar el valor codificado
-        original_values[col] = selected_value  # Guardar el valor original para mostrar
+        input_data[col] = encoders[col].transform([selected_value])[0]  # valor codificado para el modelo
+        original_values[col] = selected_value  # valor original para mostrar
     else:  # columna numérica
-        input_data[col] = st.sidebar.number_input(col, value=0.0)
+        val = st.sidebar.number_input(col, value=0.0)
+        input_data[col] = val
+        original_values[col] = val  # también guardamos el valor numérico como "original"
 
 # -------------------------------
-# 4. Mostrar los valores seleccionados (originales)
+# 4. Mostrar los valores seleccionados (siempre originales)
 # -------------------------------
-st.subheader("Valores seleccionados:")
-for col, value in original_values.items():
-    st.write(f"{col}: {value}")
-
+st.subheader("Valores seleccionados (visibles para el usuario):")
 for col in feature_columns:
-    if col not in original_values:  # Para columnas numéricas
-        st.write(f"{col}: {input_data[col]}")
+    st.write(f"**{col}:** {original_values[col]}")
 
-# Crear DataFrame
+# DataFrame para el modelo (usa los codificados)
 input_df = pd.DataFrame([input_data], columns=feature_columns)
 
 # -------------------------------
