@@ -12,7 +12,7 @@ st.write("Esta aplicación predice si habrá una respuesta oportuna basado en la
 # -------------------------------
 # 2. Cargar objetos
 # -------------------------------
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model = joblib.load(os.path.join(BASE_DIR, "rf_model.pkl"))
 scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
 feature_columns = joblib.load(os.path.join(BASE_DIR, "feature_columns.pkl"))
@@ -26,19 +26,27 @@ st.sidebar.header("Ingrese los datos del cliente")
 input_data = {}
 
 for col in feature_columns:
-    if column_info[col]["type"] == "numeric":
+    col_type = column_info[col]["type"]
+    if col_type == "numeric":
         input_data[col] = st.sidebar.number_input(col, value=0.0)
-    else:
+    elif col_type == "categorical":
+        # Mostrar las categorías como aparecen en el dataset original
         input_data[col] = st.sidebar.selectbox(col, column_info[col]["categories"])
+    else:
+        st.warning(f"Columna {col} no tiene tipo reconocido.")
 
-# Crear DataFrame
+# Crear DataFrame con tipos originales
 input_df = pd.DataFrame([input_data], columns=feature_columns)
 
 # -------------------------------
 # 4. Transformar categóricas con LabelEncoder
 # -------------------------------
 for col, le in encoders.items():
-    input_df[col] = le.transform(input_df[col])
+    try:
+        input_df[col] = le.transform(input_df[col])
+    except ValueError:
+        st.error(f"La categoría ingresada para {col} no está en el conjunto de entrenamiento.")
+        st.stop()
 
 # -------------------------------
 # 5. Escalar datos
@@ -57,5 +65,6 @@ if st.button("Predecir"):
     else:
         st.error("❌ La respuesta no será oportuna")
 
-    st.info(f"Probabilidad de Respuesta Oportuna: {prediction_prob[0][1]:.2f}")
-    st.info(f"Probabilidad de Respuesta No Oportuna: {prediction_prob[0][0]:.2f}")
+    st.write("Probabilidades:")
+    st.write(f"Oportuna: {prediction_prob[0][1]:.2f}")
+    st.write(f"No Oportuna: {prediction_prob[0][0]:.2f}")
