@@ -68,22 +68,3 @@ if st.button("Predecir"):
     st.info(f"Probabilidad de Respuesta Oportuna: {prediction_prob[0][1]:.2f}")
     st.info(f"Probabilidad de Respuesta No Oportuna: {prediction_prob[0][0]:.2f}")
 
-
-
-column_info = joblib.load(os.path.join(BASE_DIR, "column_info.pkl"))
-feature_columns = joblib.load(os.path.join(BASE_DIR, "feature_columns.pkl"))
-
-input_data = {}
-for col in feature_columns:
-    if column_info[col]["type"] == "numeric":
-        input_data[col] = st.sidebar.number_input(col, value=0.0)
-    else:
-        # Para categóricas usamos selectbox con las categorías originales
-        input_data[col] = st.sidebar.selectbox(col, column_info[col]["categories"])
-
-input_df = pd.DataFrame([input_data], columns=feature_columns)
-
-# Transformar con LabelEncoder
-for col, le in encoders.items():
-    input_df[col] = le.transform(input_df[col])
-
