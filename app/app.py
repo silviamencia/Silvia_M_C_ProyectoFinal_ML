@@ -28,25 +28,25 @@ st.sidebar.header("Ingrese los datos del cliente")
 # -------------------------------
 # 3. Inputs dinámicos
 # -------------------------------
-input_data = {}       # valores codificados para el modelo
-original_values = {}  # valores originales para mostrar al usuario
+input_data = {}       # valores numéricos (para el modelo)
+original_values = {}  # valores originales (para mostrar al usuario)
 
 for col in feature_columns:
     if col in encoders:  # columna categórica
         categories = encoders[col].classes_.tolist()
-        selected_value = st.sidebar.selectbox(col, categories)
-        input_data[col] = encoders[col].transform([selected_value])[0]  # numérico
-        original_values[col] = selected_value  # legible
+        selected_value = st.sidebar.selectbox(col, categories)   # el usuario ve valores originales
+        input_data[col] = encoders[col].transform([selected_value])[0]  # valor numérico para el modelo
+        original_values[col] = selected_value  # guardamos el valor original
     else:  # columna numérica
         val = st.sidebar.number_input(col, value=0.0)
         input_data[col] = val
-        original_values[col] = val  # lo guardamos igual para mostrarlo luego
+        original_values[col] = val  # guardamos el valor tal cual
 
 # -------------------------------
-# 4. Mostrar SIEMPRE los valores originales
+# 4. Mostrar SIEMPRE valores originales
 # -------------------------------
-st.subheader("Valores seleccionados (originales):")
-st.table(pd.DataFrame([original_values]))  # muestra en tabla legible
+st.subheader("Valores seleccionados (originales, antes del LabelEncoder):")
+st.dataframe(pd.DataFrame([original_values]))  # aquí ves texto en lugar de números
 
 # -------------------------------
 # 5. DataFrame para el modelo
@@ -65,6 +65,7 @@ if st.button("Predecir"):
     prediction = model.predict(input_scaled)
     prediction_prob = model.predict_proba(input_scaled)
 
+    st.subheader("Resultado de la predicción:")
     if prediction[0] == 1:
         st.success("✅ La respuesta será oportuna")
     else:
