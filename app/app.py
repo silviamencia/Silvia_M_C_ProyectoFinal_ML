@@ -26,39 +26,40 @@ encoders = joblib.load(ENCODERS_PATH)
 st.sidebar.header("Ingrese los datos del cliente")
 
 # -------------------------------
-# 3. Crear inputs dinámicos
+# 3. Inputs dinámicos
 # -------------------------------
-input_data = {}
-original_values = {}
+input_data = {}       # valores codificados para el modelo
+original_values = {}  # valores originales para mostrar al usuario
 
 for col in feature_columns:
     if col in encoders:  # columna categórica
         categories = encoders[col].classes_.tolist()
         selected_value = st.sidebar.selectbox(col, categories)
-        input_data[col] = encoders[col].transform([selected_value])[0]  # valor codificado para el modelo
-        original_values[col] = selected_value  # valor original para mostrar
+        input_data[col] = encoders[col].transform([selected_value])[0]  # numérico
+        original_values[col] = selected_value  # legible
     else:  # columna numérica
         val = st.sidebar.number_input(col, value=0.0)
         input_data[col] = val
-        original_values[col] = val  # también guardamos el valor numérico como "original"
+        original_values[col] = val  # lo guardamos igual para mostrarlo luego
 
 # -------------------------------
-# 4. Mostrar los valores seleccionados (siempre originales)
+# 4. Mostrar SIEMPRE los valores originales
 # -------------------------------
-st.subheader("Valores seleccionados (visibles para el usuario):")
-for col in feature_columns:
-    st.write(f"**{col}:** {original_values[col]}")
+st.subheader("Valores seleccionados (originales):")
+st.table(pd.DataFrame([original_values]))  # muestra en tabla legible
 
-# DataFrame para el modelo (usa los codificados)
+# -------------------------------
+# 5. DataFrame para el modelo
+# -------------------------------
 input_df = pd.DataFrame([input_data], columns=feature_columns)
 
 # -------------------------------
-# 5. Escalar datos
+# 6. Escalar datos
 # -------------------------------
 input_scaled = scaler.transform(input_df)
 
 # -------------------------------
-# 6. Predicción
+# 7. Predicción
 # -------------------------------
 if st.button("Predecir"):
     prediction = model.predict(input_scaled)
