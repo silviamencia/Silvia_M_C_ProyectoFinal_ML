@@ -5,25 +5,24 @@ import pandas as pd
 import joblib
 import os
 
-
-BASE_DIR = os.path.dirname(__file__)  # carpeta donde está app.py
-model_path = os.path.join(BASE_DIR, "rf_model.pkl")
-scaler_path = os.path.join(BASE_DIR, "scaler.pkl")
-
-#model = joblib.load(model_path)
-#scaler = joblib.load(scaler_path)
-
+# -------------------------------
+# 1. Título de la app
+# -------------------------------
 st.title("Predicción de Respuesta Oportuna")
 st.write("Esta aplicación predice si habrá una respuesta oportuna basado en las características del cliente.")
 
 # -------------------------------
-# 1. Cargar modelo y scaler
+# 2. Cargar modelo y scaler con rutas relativas
 # -------------------------------
-model = joblib.load("rf_model.pkl")
-scaler = joblib.load("scaler.pkl")
+BASE_DIR = os.path.dirname(__file__)  # carpeta donde está app.py
+MODEL_PATH = os.path.join(BASE_DIR, "rf_model.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl")
+
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
 
 # -------------------------------
-# 2. Definir columnas de entrada
+# 3. Definir columnas de entrada
 # -------------------------------
 # Cambia esta lista por todas tus features de X
 feature_columns = ["Feature_1", "Feature_2", "Feature_3", "Feature_4"]
@@ -31,7 +30,7 @@ feature_columns = ["Feature_1", "Feature_2", "Feature_3", "Feature_4"]
 st.sidebar.header("Ingrese los datos del cliente")
 
 # -------------------------------
-# 3. Crear inputs dinámicos
+# 4. Crear inputs dinámicos
 # -------------------------------
 input_data = {}
 for col in feature_columns:
@@ -40,12 +39,12 @@ for col in feature_columns:
 input_df = pd.DataFrame([input_data])
 
 # -------------------------------
-# 4. Escalar datos
+# 5. Escalar datos
 # -------------------------------
 input_scaled = scaler.transform(input_df)
 
 # -------------------------------
-# 5. Predicción
+# 6. Predicción
 # -------------------------------
 if st.button("Predecir"):
     prediction = model.predict(input_scaled)
@@ -58,3 +57,4 @@ if st.button("Predecir"):
 
     st.info(f"Probabilidad de Respuesta Oportuna: {prediction_prob[0][1]:.2f}")
     st.info(f"Probabilidad de Respuesta No Oportuna: {prediction_prob[0][0]:.2f}")
+
