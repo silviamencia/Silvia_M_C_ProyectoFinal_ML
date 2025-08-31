@@ -14,7 +14,7 @@ FEATURES_PATH = os.path.join(BASE_DIR, "feature_columns.pkl")
 ENCODERS_PATH = os.path.join(BASE_DIR, "encoders.pkl")
 
 st.title("Predicción de Respuesta Oportuna")
-st.write("Selecciona qué columnas quieres rellenar; las demás se usarán con valores por defecto.")
+st.write("Debes seleccionar obligatoriamente **State** y **Product**. Las demás variables se completan automáticamente.")
 
 # Cargar objetos
 model = joblib.load(MODEL_PATH)
@@ -26,6 +26,7 @@ encoders = joblib.load(ENCODERS_PATH)          # dict: {columna: encoder}
 # Utilidades
 # -------------------------------
 def safe_transform_category(enc, value):
+    """Convierte categoría en número según el encoder."""
     try:
         if hasattr(enc, "classes_"):
             return int(enc.transform([value])[0])
@@ -37,6 +38,7 @@ def safe_transform_category(enc, value):
         return 0
 
 def get_first_category(enc):
+    """Devuelve la primera categoría del encoder."""
     try:
         if hasattr(enc, "classes_"):
             return enc.classes_[0]
@@ -46,34 +48,15 @@ def get_first_category(enc):
         return None
 
 # -------------------------------
-# Sidebar: columnas a rellenar
+# Inputs obligatorios: State y Product
 # -------------------------------
-st.sidebar.header("Configuración de entrada")
+st.sidebar.header("Ingrese datos del cliente")
 
-# Por defecto dejamos seleccionados tipo_cliente y State (si existen en tus features)
-defaults = []
-for col in ["tipo_cliente", "State"]:
-    if col in feature_columns:
-        defaults.append(col)
-
-cols_to_fill = st.sidebar.multiselect(
-    "Elige las columnas que quieres rellenar manualmente:",
-    options=feature_columns,
-    default=defaults
-)
-
-if not cols_to_fill:
-    st.sidebar.warning("No has seleccionado ninguna columna: se usará la primera por defecto.")
-    cols_to_fill = [feature_columns[0]]
-
-# -------------------------------
-# Inputs
-# -------------------------------
 input_data = {}
 original_values = {}
 
 for col in feature_columns:
-    if col in cols_to_fill:
+    if col in ["State", "Product"]:  # obligatorios
         if col in encoders:
             cats = None
             try:
@@ -85,7 +68,7 @@ for col in feature_columns:
                 cats = None
 
             if cats:
-                selected = st.sidebar.selectbox(f"{col} (categoría)", options=cats, key=f"sel_{col}")
+                selected = st.sidebar.selectbox(f"{col}", options=cats, key=f"sel_{col}")
                 original_values[col] = selected
                 input_data[col] = safe_transform_category(encoders[col], selected)
             else:
@@ -97,6 +80,7 @@ for col in feature_columns:
             original_values[col] = val
             input_data[col] = float(val)
     else:
+        # Rellenar automáticamente el resto
         if col in encoders:
             first_cat = get_first_category(encoders[col])
             if first_cat is not None:
@@ -114,7 +98,6 @@ for col in feature_columns:
 # -------------------------------
 st.subheader("Valores usados (originales, antes del encoder):")
 st.dataframe(pd.DataFrame([original_values]))
-st.caption(f"Columnas rellenadas por usuario: {', '.join(cols_to_fill)}")
 
 # -------------------------------
 # Preparar datos y predicción
@@ -147,3 +130,4 @@ if st.button("Predecir"):
     except Exception as e:
         st.error("Error al hacer la predicción.")
         st.text(traceback.format_exc())
+
