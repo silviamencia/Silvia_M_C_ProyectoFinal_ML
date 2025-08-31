@@ -3,6 +3,8 @@ import streamlit as st
 import joblib
 import pandas as pd
 import os
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
 
 # Ruta al modelo
 MODEL_PATH = os.path.join("models", "final_model.pkl")
