@@ -1,66 +1,51 @@
 # app.py
+
 import streamlit as st
-import joblib
 import pandas as pd
-import os
-from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
+import joblib
 
-# Ruta al modelo
-MODEL_PATH = os.path.join("models", "final_model.pkl")
+st.title("Predicción de Respuesta Oportuna")
+st.write("Esta aplicación predice si habrá una respuesta oportuna basado en las características del cliente.")
 
-st.title("Predicción: ¿La compañía respondió a tiempo?")
+# -------------------------------
+# 1. Cargar modelo y scaler
+# -------------------------------
+model = joblib.load("rf_model.pkl")
+scaler = joblib.load("scaler.pkl")
 
-# =========================
-# 1. Cargar modelo
-# =========================
-if not os.path.exists(MODEL_PATH):
-    st.error(f"No se encontró el modelo en {MODEL_PATH}. Entrena primero con train_model.py")
-    st.stop()
+# -------------------------------
+# 2. Definir columnas de entrada
+# -------------------------------
+# Cambia esta lista por todas tus features de X
+feature_columns = ["Feature_1", "Feature_2", "Feature_3", "Feature_4"]
 
-modelo = joblib.load(MODEL_PATH)
-st.success("Modelo cargado correctamente 🎉")
+st.sidebar.header("Ingrese los datos del cliente")
 
-# =========================
-# 2. Inputs del usuario
-# =========================
-# Estos deben coincidir con las columnas de X_train
-estado = st.selectbox(
-    "¿En qué estado vives?",
-    options=['AE','AK','AL','AP','AR','AS','AZ','CA','CO','CT','DC','DE','FL','GA','GU',
-             'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MH','MI','MN','MO',
-             'MS','MT','NC','ND','NE','NH','NJ','NM','NV','NY','OH','OK','OR','PA','PR',
-             'PW','RI','SC','SD','TN','TX','UT','VA','VI','VT','WA','WI','WV','WY']
-)
+# -------------------------------
+# 3. Crear inputs dinámicos
+# -------------------------------
+input_data = {}
+for col in feature_columns:
+    input_data[col] = st.sidebar.number_input(col, value=0.0)
 
-producto = st.selectbox(
-    "Producto relacionado con la queja",
-    options=['Debt collection','Mortgage','Credit card','Consumer loan',
-             'Bank account or service','Payday loan','Credit reporting',
-             'Money transfers','Student loan','Prepaid card',
-             'Other financial service']
-)
+input_df = pd.DataFrame([input_data])
 
-# Ejemplo si tu dataset tiene variables numéricas
-# monto = st.number_input("Monto de la transacción", min_value=0, value=100)
+# -------------------------------
+# 4. Escalar datos
+# -------------------------------
+input_scaled = scaler.transform(input_df)
 
-# =========================
-# 3. Crear DataFrame de entrada
-# =========================
-entrada = pd.DataFrame([{
-    "estado": estado,
-    "producto": producto,
-    # "monto": monto,  # Agrega aquí todas las columnas que usaste en X_train
-}])
-
-# =========================
-# 4. Predicción
-# =========================
+# -------------------------------
+# 5. Predicción
+# -------------------------------
 if st.button("Predecir"):
-    prediccion = modelo.predict(entrada)
-    st.success(f"Predicción del modelo: {prediccion[0]}")
+    prediction = model.predict(input_scaled)
+    prediction_prob = model.predict_proba(input_scaled)
 
-    # Mostrar probabilidad si el modelo tiene predict_proba
-    if hasattr(modelo, "predict_proba"):
-        prob = modelo.predict_proba(entrada)[0][1]
-        st.write(f"Probabilidad de la clase 1 (respuesta a tiempo): {prob:.2f}")
+    if prediction[0] == 1:
+        st.success("✅ La respuesta será oportuna")
+    else:
+        st.error("❌ La respuesta no será oportuna")
+
+    st.info(f"Probabilidad de Respuesta Oportuna: {prediction_prob[0][1]:.2f}")
+    st.info(f"Probabilidad de Respuesta No Oportuna: {prediction_prob[0][0]:.2f}")
