@@ -88,14 +88,19 @@ for col in feature_columns:
             # Intentar obtener categorías para ofrecer un selectbox
             cats = None
             try:
+                # Si es un LabelEncoder
                 if hasattr(encoders[col], "classes_"):
                     cats = list(encoders[col].classes_)
+                # Si es un OrdinalEncoder
                 elif hasattr(encoders[col], "categories_"):
-                    cats = list(encoders[col].categories_[0])
+                    cats = list(encoders[col].categories_[0])  # OrdinalEncoder tiene categorías en un array 2D
+
             except Exception:
                 cats = None
 
             if cats:
+                # Mostrar las categorías disponibles antes de aplicar el LabelEncoder
+                st.write(f"Categorías originales para '{col}': {cats}")
                 selected = st.sidebar.selectbox(f"{col} (categoría)", options=cats, key=f"sel_{col}")
                 original_values[col] = selected
                 input_data[col] = safe_transform_category(encoders[col], selected)
